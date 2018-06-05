@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+  "github.com/gorilla/handlers"
 	"log"
 	"net/http"
 )
@@ -14,8 +15,12 @@ func main() {
   router.HandleFunc("/message", handleQryMessage).Methods("GET")
   router.HandleFunc("/m/{msg}", handleUrlMessage).Methods("GET")
 
+  headersOk := handlers.AllowedHeaders([]string{"Authorization"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"})
+
 	fmt.Println("Running server!")
-	log.Fatal(http.ListenAndServe(":3000", router))
+  log.Fatal(http.ListenAndServe(":3000", handlers.CORS(originsOk, headersOk, methodsOk)(router)))
 }
 
 func handleQryMessage(w http.ResponseWriter, r *http.Request) {
