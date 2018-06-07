@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS users
 
 func TestEmptyTable(t *testing.T) {
 	clearTable()
-	req, _ := http.NewRequest("GET", "/users", nil)
+	req := httptest.NewRequest("GET", "/users", nil)
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
 	if body := response.Body.String(); body != "[]" {
@@ -62,7 +62,7 @@ func TestEmptyTable(t *testing.T) {
 
 func TestGetNonExistentUser(t *testing.T) {
 	clearTable()
-	req, _ := http.NewRequest("GET", "/user/45", nil)
+	req := httptest.NewRequest("GET", "/user/45", nil)
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusNotFound, response.Code)
 	var m map[string]string
@@ -77,7 +77,7 @@ func TestCreateUser(t *testing.T) {
 
 	payload := []byte(`{"name":"test user","age":30}`)
 
-	req, _ := http.NewRequest("POST", "/user", bytes.NewBuffer(payload))
+	req := httptest.NewRequest("POST", "/user", bytes.NewBuffer(payload))
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -103,7 +103,7 @@ func TestCreateUser(t *testing.T) {
 func TestGetUser(t *testing.T) {
 	clearTable()
 	addUsers(1)
-	req, _ := http.NewRequest("GET", "/user/1", nil)
+	req := httptest.NewRequest("GET", "/user/1", nil)
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
 }
@@ -122,14 +122,14 @@ func TestUpdateUser(t *testing.T) {
 	clearTable()
 	addUsers(1)
 
-	req, _ := http.NewRequest("GET", "/user/1", nil)
+	req := httptest.NewRequest("GET", "/user/1", nil)
 	response := executeRequest(req)
 	var originalUser map[string]interface{}
 	json.Unmarshal(response.Body.Bytes(), &originalUser)
 
 	payload := []byte(`{"name":"test user - updated name","age":21}`)
 
-	req, _ = http.NewRequest("PUT", "/user/1", bytes.NewBuffer(payload))
+	req = httptest.NewRequest("PUT", "/user/1", bytes.NewBuffer(payload))
 	response = executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -154,15 +154,15 @@ func TestDeleteUser(t *testing.T) {
 	clearTable()
 	addUsers(1)
 
-	req, _ := http.NewRequest("GET", "/user/1", nil)
+	req := httptest.NewRequest("GET", "/user/1", nil)
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	req, _ = http.NewRequest("DELETE", "/user/1", nil)
+	req = httptest.NewRequest("DELETE", "/user/1", nil)
 	response = executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	req, _ = http.NewRequest("GET", "/user/1", nil)
+	req = httptest.NewRequest("GET", "/user/1", nil)
 	response = executeRequest(req)
 	checkResponseCode(t, http.StatusNotFound, response.Code)
 }
